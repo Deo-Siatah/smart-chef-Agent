@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "smart_chef": "./src/graph.py:graph"
+  },
+  "env": ".env"
+}

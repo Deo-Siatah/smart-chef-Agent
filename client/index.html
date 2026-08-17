@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Chef</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #2B1B12;
+    --panel: #4A3223;
+    --panel-light: #5A3E2C;
+    --cream: #E8DCC8;
+    --cream-dim: #C9BBA4;
+    --accent: #C97B3F;
+    --accent-dim: #a86633;
+    --safe: #7C9070;
+    --warn: #B85450;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(201,123,63,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(124,144,112,0.06), transparent 55%);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    max-width: 720px;
+    padding: 32px 20px 16px;
+    text-align: left;
+  }
+
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 2rem;
+    margin: 0;
+    color: var(--cream);
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    margin: 4px 0 0;
+    color: var(--cream-dim);
+    font-size: 0.9rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 720px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px 20px;
+  }
+
+  .settings {
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .settings input, .settings select {
+    background: var(--bg);
+    border: 1px solid rgba(232,220,200,0.15);
+    color: var(--cream);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+  }
+
+  .settings label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cream-dim);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* Signature element: ingredient/allergy chips styled like torn pantry labels,
+     not generic rounded pills — a small nod to the actual subject matter. */
+  .chip {
+    background: var(--accent);
+    color: #2B1B12;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px 4px;
+    border-radius: 2px 8px 2px 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chip.warn { background: var(--warn); color: var(--cream); }
+  .chip button {
+    background: none; border: none; color: inherit; cursor: pointer;
+    font-size: 0.9rem; line-height: 1; padding: 0; opacity: 0.7;
+  }
+  .chip button:hover { opacity: 1; }
+
+  #messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+    padding: 8px 0 16px;
+  }
+
+  .msg {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    line-height: 1.55;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+  }
+
+  .msg.user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #2B1B12;
+    font-weight: 500;
+    border-bottom-right-radius: 2px;
+  }
+
+  .msg.bot {
+    align-self: flex-start;
+    background: var(--panel);
+    border-bottom-left-radius: 2px;
+  }
+
+  .msg.bot strong { color: var(--accent); font-family: 'Fraunces', serif; }
+
+  /* Recipe picker gets a distinct card treatment — it's a different
+     interaction mode (choosing), not just more chat text. */
+  .picker {
+    align-self: stretch;
+    background: var(--panel-light);
+    border: 1px solid var(--accent-dim);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .picker .picker-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cream-dim);
+    margin-bottom: 8px;
+  }
+  .picker-options { display: flex; flex-direction: column; gap: 8px; }
+  .picker-option {
+    background: var(--bg);
+    border: 1px solid rgba(232,220,200,0.15);
+    color: var(--cream);
+    text-align: left;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+  }
+  .picker-option:hover { border-color: var(--accent); background: var(--panel); }
+
+  form#composer {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(232,220,200,0.1);
+  }
+
+  #input {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid rgba(232,220,200,0.15);
+    color: var(--cream);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    resize: none;
+  }
+  #input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  #send {
+    background: var(--accent);
+    color: #2B1B12;
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  #send:hover { background: #d98a4d; }
+  #send:disabled { opacity: 0.5; cursor: default; }
+
+  .cursor {
+    display: inline-block;
+    width: 7px; height: 1em;
+    background: var(--accent);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 0.9s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Smart Chef</h1>
+  <p>Tell it what's left in the kitchen.</p>
+</header>
+
+<div class="container">
+  <div class="settings">
+    <label>Allergies
+      <input id="allergyInput" type="text" placeholder="e.g. fish, peanuts" style="width:160px" />
+    </label>
+    <label>Diet
+      <select id="dietSelect">
+        <option value="">None</option>
+        <option value="vegan">Vegan</option>
+        <option value="vegetarian">Vegetarian</option>
+      </select>
+    </label>
+    <label>Goal
+      <select id="goalSelect">
+        <option value="">None</option>
+        <option value="weight_loss">Weight loss</option>
+        <option value="weight_gain">Weight gain</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="messages"></div>
+
+  <form id="composer">
+    <textarea id="input" rows="1" placeholder="I have chicken, rice, and tomatoes..."></textarea>
+    <button id="send" type="submit">Send</button>
+  </form>
+</div>
+
+<script>
+const API_BASE = "http://localhost:8000";
+const threadId = "thread-" + Math.random().toString(36).slice(2);
+const userId = "guest";
+let isFirstTurn = true;
+let awaitingSelection = false;
+
+const messagesEl = document.getElementById("messages");
+const inputEl = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const form = document.getElementById("composer");
+
+function addUserMessage(text) {
+  const div = document.createElement("div");
+  div.className = "msg user";
+  div.textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addBotMessageStream() {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  div.appendChild(cursor);
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return { el: div, cursor };
+}
+
+function appendToken(streamState, token) {
+  streamState.el.insertBefore(document.createTextNode(token), streamState.cursor);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function finishStream(streamState) {
+  streamState.cursor.remove();
+}
+
+function showPicker(promptText) {
+  const lines = promptText.split("\n").filter(l => l.trim());
+  const label = lines[0];
+  const options = lines.slice(1).filter(l => /^\d+\./.test(l.trim()));
+
+  const wrap = document.createElement("div");
+  wrap.className = "msg picker";
+
+  const labelEl = document.createElement("div");
+  labelEl.className = "picker-label";
+  labelEl.textContent = "Choose a recipe";
+  wrap.appendChild(labelEl);
+
+  const desc = document.createElement("div");
+  desc.style.marginBottom = "10px";
+  desc.textContent = label;
+  wrap.appendChild(desc);
+
+  const optWrap = document.createElement("div");
+  optWrap.className = "picker-options";
+
+  if (options.length) {
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "picker-option";
+      btn.type = "button";
+      btn.textContent = opt.trim();
+      btn.onclick = () => {
+        addUserMessage(opt.trim());
+        wrap.remove();
+        sendResume(opt.trim());
+      };
+      optWrap.appendChild(btn);
+    });
+  }
+  wrap.appendChild(optWrap);
+
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  awaitingSelection = true;
+}
+
+async function readSSE(response, onData, onInterrupt) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const events = buffer.split("\n\n");
+    buffer = events.pop(); // last chunk may be incomplete, keep for next read
+
+    for (const evt of events) {
+      if (!evt.trim()) continue;
+      const isInterrupt = evt.startsWith("event: interrupt");
+      const dataLine = evt.split("\n").find(l => l.startsWith("data:"));
+      if (!dataLine) continue;
+      const data = dataLine.slice(5).replace(/^ /, "");
+
+      if (isInterrupt) {
+        onInterrupt(data);
+      } else if (data) {
+        onData(data);
+      }
+    }
+  }
+}
+
+async function sendMessage(text) {
+  addUserMessage(text);
+  sendBtn.disabled = true;
+
+  const body = {
+    thread_id: threadId,
+    user_id: userId,
+    message: text,
+    is_first_turn: isFirstTurn,
+    allergies: document.getElementById("allergyInput").value
+      .split(",").map(s => s.trim()).filter(Boolean),
+    dietary_restriction: document.getElementById("dietSelect").value || null,
+    goal: document.getElementById("goalSelect").value || null,
+    perishable_ingredients: [],
+  };
+  isFirstTurn = false;
+
+  const streamState = addBotMessageStream();
+  let gotInterrupt = false;
+
+  try {
+    const res = await fetch(`${API_BASE}/chat/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    await readSSE(
+      res,
+      (token) => appendToken(streamState, token),
+      (promptText) => {
+        gotInterrupt = true;
+        finishStream(streamState);
+        showPicker(promptText);
+      }
+    );
+  } catch (e) {
+    appendToken(streamState, "\n[Connection error — is the API running on :8000?]");
+  }
+
+  if (!gotInterrupt) finishStream(streamState);
+  sendBtn.disabled = false;
+}
+
+async function sendResume(replyText) {
+  sendBtn.disabled = true;
+  const streamState = addBotMessageStream();
+
+  try {
+    const res = await fetch(`${API_BASE}/resume/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ thread_id: threadId, user_id: userId, reply: replyText }),
+    });
+    await readSSE(res, (token) => appendToken(streamState, token), () => {});
+  } catch (e) {
+    appendToken(streamState, "\n[Connection error]");
+  }
+
+  finishStream(streamState);
+  awaitingSelection = false;
+  sendBtn.disabled = false;
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = "";
+  sendMessage(text);
+});
+
+inputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    form.requestSubmit();
+  }
+});
+</script>
+
+</body>
+</html>

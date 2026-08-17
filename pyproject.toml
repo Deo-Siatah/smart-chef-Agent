@@ -1,0 +1,22 @@
+[project]
+name = "smart-chef-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph",
+    "langchain",
+    "langchain-groq",
+    "python-dotenv",
+    "pydantic-settings",
+    "tavily-python",
+    "fastapi",
+    "uvicorn",
+    "langgraph-checkpoint-postgres",
+    "psycopg[binary,pool]"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
