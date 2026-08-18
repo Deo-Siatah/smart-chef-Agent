@@ -25,7 +25,7 @@ class UserProfile(BaseModel):
 # Structured-output LLM: forces the response to conform to UserProfile's
 # schema rather than free text we'd have to parse ourselves.
 extraction_llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",
     api_key=settings.GROQ_API_KEY,
     temperature=0,
 ).with_structured_output(UserProfile)

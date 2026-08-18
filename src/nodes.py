@@ -10,7 +10,7 @@ from src.tools.recipe_search import search_recipes, search_recipes_web
 
 tools = [search_recipes, search_recipes_web]
 
-llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=settings.GROQ_API_KEY, temperature=0)
+llm = ChatGroq(model="openai/gpt-oss-120b", api_key=settings.GROQ_API_KEY, temperature=0)
 llm_with_tools = llm.bind_tools(tools)
 
 # System prompt: tells the agent its job and when to use the tool.

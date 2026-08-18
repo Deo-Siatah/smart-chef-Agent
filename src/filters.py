@@ -11,7 +11,7 @@ from src.config import settings
 from langchain_groq import ChatGroq
 
 # Plain (non-tool-bound) LLM, used only for the final synthesis step.
-synth_llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=settings.GROQ_API_KEY)
+synth_llm = ChatGroq(model="openai/gpt-oss-120b", api_key=settings.GROQ_API_KEY)
 
 DIETARY_BLOCKLISTS = {
     "vegan": {"chicken", "beef", "pork", "fish", "egg", "cheese", "milk", "butter", "honey"},
